@@ -89,7 +89,7 @@ public class CarResource {
 		}
 	}
 
-	@RequestMapping(value = "/available", method = RequestMethod.GET, produces = { "application/json" })
+	@RequestMapping(value = "/availibity", method = RequestMethod.GET, produces = { "application/json" })
 	@ApiOperation(value = "search for available cars")
 	protected List<CarAvailability> findAvailbleCars(@RequestParam String plate) throws Throwable {
 		try {
@@ -100,7 +100,7 @@ public class CarResource {
 
 	}
 
-	@RequestMapping(value = "/available/all", method = RequestMethod.GET, produces = { "application/json" })
+	@RequestMapping(value = "/availibity/all", method = RequestMethod.GET, produces = { "application/json" })
 	@ApiOperation(value = "list all available cars")
 	protected List<CarAvailability> findAllAvCars() throws Throwable {
 		try {
