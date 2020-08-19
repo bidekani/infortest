@@ -2,10 +2,11 @@
 How do we build and run it? 
 <br>mvn clean test spring-boot:run <br>
 <b>Running version in openshift: <br>
+http://infortest-git-my-tests.apps.ca-central-1.starter.openshift-online.com/
 
 
 <br>
-<b> to run the full acceptance tests use this profile: </b>
+<I><b> run integration test  using a different maven profile </b></I>
 <br>mvn test -Pacceptance <br>
 
 
