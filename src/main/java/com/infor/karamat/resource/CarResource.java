@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -78,7 +79,7 @@ public class CarResource {
 		}
 	}
 
-	@RequestMapping(value = "/search", method = RequestMethod.GET, produces = { "application/json" })
+	@RequestMapping(value = "/availibity/filter", method = RequestMethod.GET, produces = { "application/json" })
 	@ApiOperation(value = "search for available cars")
 	protected List<CarAvailability> findCars(@RequestParam LocalDateTime fromDate, @RequestParam LocalDateTime toDate,
 			@RequestParam double budget) throws Throwable {
@@ -89,9 +90,9 @@ public class CarResource {
 		}
 	}
 
-	@RequestMapping(value = "/availibity", method = RequestMethod.GET, produces = { "application/json" })
+	@RequestMapping(value = "/availibity/{plate}", method = RequestMethod.GET, produces = { "application/json" })
 	@ApiOperation(value = "search for available cars")
-	protected List<CarAvailability> findAvailbleCars(@RequestParam String plate) throws Throwable {
+	protected List<CarAvailability> findAvailbleCars(@PathVariable("plate") String plate) throws Throwable {
 		try {
 			return carService.findCarAvailability(plate).get();
 		} catch (Exception e) {
@@ -100,7 +101,7 @@ public class CarResource {
 
 	}
 
-	@RequestMapping(value = "/availibity/all", method = RequestMethod.GET, produces = { "application/json" })
+	@RequestMapping(value = "/availibity", method = RequestMethod.GET, produces = { "application/json" })
 	@ApiOperation(value = "list all available cars")
 	protected List<CarAvailability> findAllAvCars() throws Throwable {
 		try {
