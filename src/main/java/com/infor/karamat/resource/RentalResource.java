@@ -32,9 +32,9 @@ public class RentalResource {
 
 	@RequestMapping(value = "/book/{plate}/{userId}", method = RequestMethod.GET, produces = { "application/json" })
 	@ApiOperation(value = "book a car")
-	protected void bookCar(@PathVariable(value = "plate") String carId, @PathVariable(value = "userId") int userId,
-			@RequestParam LocalDateTime startDate, @RequestParam LocalDateTime endDate) {
-		rentalService.book(carId, userId, startDate, endDate);
+	protected Rental bookCar(@PathVariable(value = "plate") String carId, @PathVariable(value = "userId") int userId,
+			@RequestParam LocalDateTime startDate, @RequestParam LocalDateTime endDate) throws Throwable {
+		return rentalService.book(carId, userId, startDate, endDate).get();
 	}
 
 	@RequestMapping(value = "/report/booked", method = RequestMethod.GET, produces = { "application/json" })
