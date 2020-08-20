@@ -32,14 +32,8 @@ public class CarService {
 		return CompletableFuture.completedFuture(carRepository.save(car));
 	}
 	
-//	@Async
-	public Car regsiterCar1(Car car) {
-		return carRepository.save(car);
-	}
-
 	@Async
 	public CompletableFuture<List<Car>> listAll() {
-		System.out.println("list fired....");
 		return CompletableFuture.completedFuture(carRepository.findAll());
 	}
 

@@ -3,17 +3,21 @@ package com.infor.karamat.handler;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.ComputationException;
 import com.infor.karamat.model.CarAvailability;
 import com.infor.karamat.model.Rental;
 import com.infor.karamat.repository.CarAvailibilityRepository;
 import com.infor.karamat.repository.RentalRepository;
 import com.infor.karamat.util.NoResourceException;
+
+import io.netty.util.concurrent.CompleteFuture;
 
 @Service
 public class RentalService {
@@ -26,32 +30,35 @@ public class RentalService {
 	@Autowired
 	private CarAvailibilityRepository carAvRepo;
 
-//	@Async
-	public void book(String plate, int userId, LocalDateTime startDate, LocalDateTime endDate) {
+	@Async
+	public CompletableFuture<Rental> book(String plate, int userId, LocalDateTime startDate, LocalDateTime endDate) {
 		List<CarAvailability> carAvList = carAvRepo.findByPlate(plate);
 		
-		if (!carAvList.isEmpty())
-			carAvList.stream().forEach(item -> {
-				if (item.getStartDate().isBefore(startDate) && item.getEndDate().isAfter(endDate)) {
-					double duration = Duration.between(startDate, endDate).toHours();
+		if (!carAvList.isEmpty()) {
+			Optional<CarAvailability> result = carAvList.stream().filter(item -> 
+			(item.getStartDate().isBefore(startDate) && item.getEndDate().isAfter(endDate)))
+			.findFirst();
+			if (result.isPresent()){
+				CarAvailability resultContent = result.get();
+				double duration = Duration.between(startDate, endDate).toHours();
 
-					double totalPayment = item.getPricePerHour() * duration;
-					rentalRepo.save(new Rental(0, plate, userId, startDate, endDate, duration, totalPayment));
+				double totalPayment = resultContent.getPricePerHour() * duration;
+				//Update the Availability table
+				carAvRepo.deleteById(resultContent.getId());
 
-					//Update the Availability table
-					carAvRepo.deleteById(item.getId());
+				if (Duration.between(resultContent.getStartDate(), startDate).toMinutes() > minGap)
+					carAvRepo.save(
+							new CarAvailability(0, plate, resultContent.getStartDate(), startDate, resultContent.getPricePerHour()));
+				if (Duration.between(endDate, resultContent.getEndDate()).toMinutes() > minGap)
+					carAvRepo.save(
+							new CarAvailability(0, plate, endDate, resultContent.getEndDate(), resultContent.getPricePerHour()));
+				return  CompletableFuture.completedFuture(rentalRepo.save(new Rental(0, plate, userId, startDate, endDate, duration, totalPayment)));			
+			}
 
-					if (Duration.between(item.getStartDate(), startDate).toMinutes() > minGap)
-						carAvRepo.save(
-								new CarAvailability(0, plate, item.getStartDate(), startDate, item.getPricePerHour()));
-					if (Duration.between(endDate, item.getEndDate()).toMinutes() > minGap)
-						carAvRepo.save(
-								new CarAvailability(0, plate, endDate, item.getEndDate(), item.getPricePerHour()));
-				}
-			});
-		else {
+		} else {
 			throw new NoResourceException("car with this plate does not exist " + plate);
 		}
+		return null;		
 	}
 
 	@Async
